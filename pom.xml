@@ -28,6 +28,7 @@
 	</scm>
 	<properties>
 		<java.version>24</java.version>
+		<pmd.version>3.21.2</pmd.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -71,10 +72,71 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.puppycrawl.tools</groupId>
+			<artifactId>checkstyle</artifactId>
+			<version>10.12.0</version> <!-- Match your plugin's version -->
+		</dependency>
+
+
 	</dependencies>
 
 	<build>
+
+		<!-- To define the plugin version in your parent POM
+
+		( how to run go to cmd and type mvn site ,look at the targeet folder it will shows cfd which meanns duplcate )
+		three plugin you need to add plugin management,pmd and site and project info and at last report plugin -->
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-pmd-plugin</artifactId>
+					<version>${pmd.version}</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 		<plugins>
+
+			<!-- PMD plugin for build-time checks -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pmd-plugin</artifactId>
+				<version>${pmd.version}</version>
+				<configuration>
+					<includes>
+						<include>**/*.java</include>
+					</includes>
+					<linkXRef>false</linkXRef>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<goals>
+							<goal>check</goal>
+							<goal>cpd-check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>4.0.0-M13</version>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>3.5.0</version>
+			</plugin>
+
+
+
+
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -99,7 +161,61 @@
 					</excludes>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>com.diffplug.spotless</groupId>
+				<artifactId>spotless-maven-plugin</artifactId>
+				<version>2.43.0</version> <!-- check latest version -->
+				<configuration>
+					<java>
+						<googleJavaFormat/>
+						<trimTrailingWhitespace/> <!-- Removes extra spaces at line end -->
+						<endWithNewline/>         <!-- Ensures files end with a single newline -->
+					</java>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>3.3.0</version>
+				<configuration>
+					<configLocation>Config/checkstyle.xml</configLocation> <!-- your custom config -->
+					<consoleOutput>true</consoleOutput>
+					<failsOnError>false</failsOnError> <!-- doesn't fail build -->
+					<linkXRef>false</linkXRef> <!-- disables the XRef warning -->
+				</configuration>
+			</plugin>
+
+
+
+
 		</plugins>
+
+
+
 	</build>
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pmd-plugin</artifactId>
+				<version>${pmd.version}</version>
+				<configuration>
+					<language>java</language>
+					<rulesets>
+						<!-- A rule set, that comes bundled with PMD -->
+						<ruleset>/category/java/bestpractices.xml</ruleset>
+					</rulesets>
+					<includes>
+						<include>**/*.java</include>
+					</includes>
+					<compileSourceRoots>
+						<compileSourceRoot>${basedir}/src/main/java</compileSourceRoot>
+					</compileSourceRoots>
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting>
 
 </project>
